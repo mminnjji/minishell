@@ -48,6 +48,7 @@ int get_malloc_list(char *str, t_cmd *start) //ㄹㅇ 완벽 ㄷㄷ
     i = 0;
     while (i++ < count)
     {
+        start->arg = malloc(sizeof(t_arg));
         start->next = malloc(sizeof(t_cmd));
         start = start->next;
     }
@@ -63,11 +64,13 @@ void get_init_cmd_list(char *str, t_cmd *start, int pipe_num)
     int j;
     int flag;
     int pipe_locate[pipe_num];
+    t_cmd *tmp;
 
     i = -1;
     j = 0;
     flag = 0;
     pipe_locate[0] = 0;
+    tmp = start;
     while (str[++i])
     {
         if (str[i] == '\"' || str[i] == '\'') // 따옴표 열림/닫힘시 플래그 변경
@@ -85,6 +88,7 @@ void get_init_cmd_list(char *str, t_cmd *start, int pipe_num)
         start = start->next;
         i++;
     }
+    start=tmp;
 }
 
 
@@ -98,7 +102,12 @@ void work_cmd(char *str) // real 실행부
     if (!start)
 //여길 어케해야하는지 모르겟삼
     pipe_count = get_list_malloc(str, &start); //start 를 시작으로 하는 구조체 할당됨 + 
-    get_init_cmd_list(str, start, pipe_count);
+    get_init_cmd_list(str, start, pipe_count); // 좀,, 예쁘게 만들고 싶은뎅
+    while (start)
+    {
+        printf("%s\n", start->arg->first_cmd);
+        start=start->next;
+    }
 // 구조체-.arg에서 파싱 -> 파이프로 나눈 문자열 담아주고,,,
 }
 
