@@ -3,11 +3,13 @@
   "configurations": [
     {
       "name": "C/C++ Runner: Debug Session",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/man/ms",
-      "program": "/Users/man/ms/build/Debug/outDebug"
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "cwd": "//wsl.localhost/Ubuntu/home/minji/minishell",
+      "program": "//wsl.localhost/Ubuntu/home/minji/minishell/build/Debug/outDebug"
     }
   ]
 }
