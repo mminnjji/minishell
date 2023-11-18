@@ -30,5 +30,7 @@ char	**ft_split(char const *str, char c);
 size_t	ft_strlcpy(char *dest, const char *src, size_t size);
 int get_init_cmd_list(char *str, t_cmd *start, int pipe_n);
 int get_malloc_list(char *str, t_cmd *start);
+int parse_by_space(t_cmd **start, int pipe_n);
+int check_quote(char *str, char c);
 
 #endif

@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-int check_quote_pipe(char *str, char c) // 파이프와 따옴표 확인
+int check_quote(char *str, char c) // 파이프와 따옴표 확인
 {
     int i;
     int flag[2];
@@ -38,7 +38,7 @@ int get_malloc_list(char *str, t_cmd *start)
     t_cmd *tmp;
 
     tmp = start;
-    count = check_quote_pipe(str, '|');
+    count = check_quote(str, '|');
     if (count < 0)
     {
         printf("syntax error\n");
@@ -77,27 +77,6 @@ int parse_by_pipe(int pip[], char *str, t_cmd **start, int pipe_n)
         tmp = tmp->next;
         i++;
     }
-    while (*start)
-    {
-        printf("cmd : %s\n", (*start)->arg->init_cmd);
-        (*start) = (*start)->next;
-    }
-    return (0);
-}
-
-int parse_by_space(t_cmd *start)
-{
-    t_arg *des;
-    int i;
-
-    i = 0;
-    des = start->arg;
-    des->parse = (char **)malloc((check_quote_pipe(des->init_cmd, ' ') + 2) * sizeof(char *));
-    printf(" 덩어리: %d \n" ,check_quote_pipe(des->init_cmd, ' ') + 2);
-    /*while (des->init_cmd[i])
-    {
-
-    }*/
     return (0);
 }
 
@@ -125,7 +104,12 @@ int get_init_cmd_list(char *str, t_cmd *start, int pipe_n)
     }
     pip[pipe_n + 1] = i;
     if (parse_by_pipe(pip, str, &start, pipe_n))
-        return (1);
-    //parse_by_space(start);
+        return (1);  
+    parse_by_space(&start, pipe_n);
+     while (start)
+    {
+        printf("cmd : %s\n", start->arg->parse[0]);
+        start = start->next;
+    }
     return (0);
 }
