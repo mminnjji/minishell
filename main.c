@@ -21,7 +21,7 @@ void work_cmd(char *str)
     }
 }
 
-int main(void)
+int main(int argc, char **argv, char *envp[])
 {
     char *str;
 
