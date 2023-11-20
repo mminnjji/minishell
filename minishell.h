@@ -7,6 +7,8 @@
 #include <readline/history.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include "get_next_line.h"
 
 typedef struct s_arg
 {
@@ -34,5 +36,6 @@ int parse_by_space(t_cmd **start, int pipe_n);
 int parse_by_quote(t_cmd **start);
 int check_quote(char *str, char c);
 int check_quote_2(char *str, char c);
+int	ft_strncmp(char *s1, char *s2, size_t n);
 
 #endif

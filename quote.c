@@ -2,17 +2,6 @@
 
 #include "minishell.h"
 
-char *delete_char(char *str, int i)
-{
-    while (str[i + 1])
-    {
-        str[i] = str[i + 1];
-        i++;
-    }
-    str[i] = 0;
-    return (str);
-}
-
 int parse_by_quote(t_cmd **start)
 {
     int i;
