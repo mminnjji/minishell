@@ -157,10 +157,11 @@ int check_heredoc(char *des)
     while (des[i])
     {
         j = 0;
-        if (ft_strcmp(des + i, "<<", 2))
+        if (!ft_strncmp(des + i , "<<", 2))
         {
-            str = get_heredoc(des, i);
+            str = get_heredoc(des, i + 2);
             str = remove_quote(str);
+            printf("str : %s i : %d\n", str, i);
             here_doc(str);
         }
         i++;
@@ -172,5 +173,5 @@ int main()
 {
     char *str = "hello <<cmd hello";
     check_heredoc(str);
-    return (0)
+    return (0);
 }
