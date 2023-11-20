@@ -35,14 +35,3 @@ char	*get_path(char **envp, char *str)
     }
     return (NULL);
 }
-
-int main(int argc, char **argv, char *envp[])
-{
-    /*while (*envp)
-    {
-        printf("envp: %s\n", *envp);
-        envp++;
-    }*/
-    printf("cmd : %s\n", get_path(envp, "WSL_INTEROP"));
-    return (0);
-}

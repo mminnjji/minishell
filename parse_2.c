@@ -42,7 +42,8 @@ int set_space_parse(char ***parse, char *str)
 
     i = 0;
     k = 0;
-    while (i < check_quote(str, ' ') + 1)
+    printf("l : %d\n", check_quote_2(str, ' '));
+    while (i < check_quote_2(str, ' '))
     {
         (*parse)[i] = get_len(str, &k, &tmp);
         if (!(*parse)[i])

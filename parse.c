@@ -1,5 +1,33 @@
 #include "minishell.h"
 
+int check_quote_2(char *str, char c) // 파이프와 따옴표 확인
+{
+    int i;
+    int flag[2];
+    int count;
+
+    i = 0;
+    count = 0;
+    flag[0] = 0;
+    flag[1] = 0;
+    while (str[i])
+    {
+        while (str[i] && str[i] == c)
+            i++;
+        if (str[i] == '\"' || str[i] == '\'')
+            flag[str[i] % 2] = 1 - flag[str[i] % 2];
+        if (str[i] && (str[i] != c || flag[0] == 1 || flag[1] == 1)) //따옴표 안이 아닐 경우
+        {
+            count++;
+            while (str[i] && (str[i] != c || flag[0] == 1 || flag[1] == 1))
+                i++;
+            i--;
+        }
+        i++;
+    }
+    return (count);
+}
+
 int check_quote(char *str, char c) // 파이프와 따옴표 확인
 {
     int i;
@@ -106,6 +134,7 @@ int get_init_cmd_list(char *str, t_cmd *start, int pipe_n)
     if (parse_by_pipe(pip, str, &start, pipe_n))
         return (1);  
     parse_by_space(&start, pipe_n);
+    //parse_by_quote(&start);
     while (start)
     {
         j = 0;
