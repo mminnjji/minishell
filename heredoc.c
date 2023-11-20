@@ -14,26 +14,32 @@ int	ft_strncmp(char *s1, char *s2, size_t n)
 	return (0);
 }
 
-// i 인덱스 문자 delete 하고 앞으로 당긴 새로운 문자열 생성
-char *delete_char(char *str, int i)
+// i 인덱스 문자 포함 n만큼 delete 하고 앞으로 당긴 새로운 문자열 생성
+char *delete_char(char *str, int i, int n)
 {
     int j;
     int k;
+    int l;
     char *res;
 
     res = malloc(sizeof(char) * strlen(str) + 1);
     j = 0;
     k = 0;
+    l = -1;
     while (str[j])
     {
         if (j == i)
-            j++;
+        {   
+            while (++l <= n)
+                j++;
+        }
         res[k] = str[j];
         k++;
         j++;
     }
-    res[j] = 0;
-    free(str);
+    res[k] = 0;
+    //free(str);
+    printf("res: %s\n", res);
     return (res);
 }
 
@@ -52,7 +58,7 @@ char *remove_quote(char *str)
         if (str[i] == '\"' || str[i] == '\'')
         {
             count++;
-            str = delete_char(str, i);
+            str = delete_char(str, i, 1);
             i--;
         }
         i++;
@@ -99,7 +105,7 @@ char *get_heredoc(char *str, int n)
     j = -1;
     flag[0] = 0;
     flag[1] = 0;
-    while (str[n + i] == ' ')
+    while (str[n + i] && str[n + i] == ' ')
             n++;
     while (str[n + i])
     {
@@ -113,16 +119,15 @@ char *get_heredoc(char *str, int n)
     while (++j < i)
         res[j] = str[n + j];
     res[j] = 0;
+    //free(str);
     return (res);
 }
 
-
-/*
-// 히어독이 있니 => 있으면 실행을 해라
+// 히어독을 발견 -> fd 에 넣어주기 -> 리스트를 ,, 돌면서?웅.. 
+// 그냥 인수 >> 리다이렉션 >> 히어독
 int check_heredoc(t_cmd **start)
 {
     int i;
-    int j;
     t_cmd *tmp;
     char *str;
 
@@ -130,48 +135,21 @@ int check_heredoc(t_cmd **start)
     while (tmp)
     {
         i = 0;
+        tmp->infile = 1; // stdin;
+        printf("cmd : %s \n",tmp->arg->init_cmd);
         while (tmp->arg->init_cmd[i])
         {
-            j = 0;
-            if (ft_strcmp(tmp->arg->init_cmd + i, "<<", 2))
+            if (!ft_strncmp(tmp->arg->init_cmd + i, "<<", 2))
             {
-                str = get_heredoc(tmp->arg->init_cmd, i);
+                str = get_heredoc(tmp->arg->init_cmd, i + 2);
                 str = remove_quote(str);
+                delete_char(tmp->arg->init_cmd, i, strlen(str) + 1); // 히어독 없애버리기
                 here_doc(str);
+                tmp->infile = open(".heredoc_tmp", O_RDONLY); // 일단! 인파일 fd열고 시작
             }
             i++;
         }
         tmp = tmp ->next;
     }
-    return (0);
-}
-*/
-
-int check_heredoc(char *des)
-{
-    int i;
-    int j;
-    char *str;
-
-    i = 0;
-    while (des[i])
-    {
-        j = 0;
-        if (!ft_strncmp(des + i , "<<", 2))
-        {
-            str = get_heredoc(des, i + 2);
-            str = remove_quote(str);
-            printf("str : %s i : %d\n", str, i);
-            here_doc(str);
-        }
-        i++;
-    }
-    return (0);
-}
-
-int main()
-{
-    char *str = "hello <<cmd hello";
-    check_heredoc(str);
     return (0);
 }

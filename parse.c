@@ -132,18 +132,10 @@ int get_init_cmd_list(char *str, t_cmd *start, int pipe_n)
     }
     pip[pipe_n + 1] = i;
     if (parse_by_pipe(pip, str, &start, pipe_n))
-        return (1);  
-    parse_by_space(&start, pipe_n);
+        return (1);
+    check_redirect(&start);
+    printf("cmd : %s\n", start->arg->init_cmd);
+    //parse_by_space(&start, pipe_n);
     //parse_by_quote(&start);
-    while (start)
-    {
-        j = 0;
-        while (start->arg->parse[j])
-        {
-            printf("cmd[%d]: %s\n", j, start->arg->parse[j]);
-            j++;
-        }
-        start = start->next;
-    }
     return (0);
 }

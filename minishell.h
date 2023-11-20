@@ -37,5 +37,11 @@ int parse_by_quote(t_cmd **start);
 int check_quote(char *str, char c);
 int check_quote_2(char *str, char c);
 int	ft_strncmp(char *s1, char *s2, size_t n);
+char *delete_char(char *str, int i, int n);
+char *remove_quote(char *str);
+int here_doc(char *str);
+char *get_heredoc(char *str, int n);
+int check_heredoc(t_cmd **start);
+int check_redirect(t_cmd **start);
 
 #endif
