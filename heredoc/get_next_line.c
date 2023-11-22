@@ -6,11 +6,11 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 12:07:46 by man               #+#    #+#             */
-/*   Updated: 2023/11/20 14:30:27 by man              ###   ########.fr       */
+/*   Updated: 2023/11/22 11:44:25 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "../includes/get_next_line.h"
 
 int	check_n(char *mod)
 {

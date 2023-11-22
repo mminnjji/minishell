@@ -6,11 +6,11 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 12:07:50 by man               #+#    #+#             */
-/*   Updated: 2023/11/20 14:30:44 by man              ###   ########.fr       */
+/*   Updated: 2023/11/22 11:44:17 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "../includes/get_next_line.h"
 
 int	ft_strlen(char *str)
 {

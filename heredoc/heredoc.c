@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../includes/minishell.h"
 
 int	ft_strncmp(char *s1, char *s2, size_t n)
 {
@@ -15,35 +15,31 @@ int	ft_strncmp(char *s1, char *s2, size_t n)
 }
 
 // i 인덱스 문자 포함 n만큼 delete 하고 앞으로 당긴 새로운 문자열 생성
-char *delete_char(char *str, int i, int n)
+char *delete_char(char **str, int i, int n)
 {
     int j;
     int k;
-    int l;
     char *res;
 
-    res = malloc(sizeof(char) * strlen(str) + 1);
+    res = malloc(sizeof(char) * (ft_strlen(*str) + 1));
     j = 0;
     k = 0;
-    l = -1;
-    while (str[j])
+    while ((*str)[j])
     {
         if (j == i)
-        {   
-            while (++l <= n)
-                j++;
-        }
-        res[k] = str[j];
+            j = j + n;
+        res[k] = (*str)[j];
+        if (!(*str)[j])
+            break;
         k++;
         j++;
     }
     res[k] = 0;
-    //free(str);
-    printf("res: %s\n", res);
+    free((*str));
     return (res);
 }
 
-//따옴표를 없애줘요 아주 아름답게.. 연결해줌
+//따옴표 제거
 char *remove_quote(char *str)
 {
     int i;
@@ -52,18 +48,17 @@ char *remove_quote(char *str)
 
     i = 0;
     count = 0;
-    len = strlen(str);
-    while (i < strlen(str) - count)
+    len = ft_strlen(str);
+    while (i <= len - count)
     {
         if (str[i] == '\"' || str[i] == '\'')
         {
             count++;
-            str = delete_char(str, i, 1);
+            str = delete_char(&str, i, 1);
             i--;
         }
         i++;
     }
-    str[i] = 0;
     return (str);
 }
 
@@ -93,8 +88,7 @@ int here_doc(char *str)
     return (0);
 }
 
-// 히어독을 발견했을 때의 마음가짐 - 스트링의 n번째부터 공백/따옴표 계산해서 대조할 문자열 생성
-char *get_heredoc(char *str, int n)
+char *get_heredoc(char *str, int n, int *len)
 {
     int i;
     int j;
@@ -106,44 +100,50 @@ char *get_heredoc(char *str, int n)
     flag[0] = 0;
     flag[1] = 0;
     while (str[n + i] && str[n + i] == ' ')
-            n++;
+    {
+        (*len)++;
+        n++;
+    }
     while (str[n + i])
     {
         if (str[n + i] == '\"' || str[n + i] == '\'')
             flag[str[n + i] % 2] = 1 - flag[str[n + i] % 2];
         if (flag[0] == 0 && flag[1] == 0 && str[n + i] == ' ')
             break;
+        (*len)++;
         i++;
     }
     res = malloc(sizeof(char) * (i + 1));
     while (++j < i)
         res[j] = str[n + j];
     res[j] = 0;
-    //free(str);
     return (res);
 }
 
-// 히어독을 발견 -> fd 에 넣어주기 -> 리스트를 ,, 돌면서?웅.. 
-// 그냥 인수 >> 리다이렉션 >> 히어독
-int check_heredoc(t_cmd **start)
+int check_heredoc(t_cmd **start, int flag[])
 {
     int i;
+    int len;
     t_cmd *tmp;
     char *str;
 
     tmp = (*start);
+    len = 2;
     while (tmp)
     {
         i = 0;
         tmp->infile = 1; // stdin;
-        printf("cmd : %s \n",tmp->arg->init_cmd);
+        tmp->outfile = 0; // stdout;
         while (tmp->arg->init_cmd[i])
         {
-            if (!ft_strncmp(tmp->arg->init_cmd + i, "<<", 2))
+            if (tmp->arg->init_cmd[i] == '\"' || tmp->arg->init_cmd[i] == '\'')
+                flag[tmp->arg->init_cmd[i] % 2] = 1 - flag[tmp->arg->init_cmd[i] % 2];
+            if (!ft_strncmp(tmp->arg->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
             {
-                str = get_heredoc(tmp->arg->init_cmd, i + 2);
+                str = get_heredoc(tmp->arg->init_cmd, i + 2, &len);
                 str = remove_quote(str);
-                delete_char(tmp->arg->init_cmd, i, strlen(str) + 1); // 히어독 없애버리기
+                tmp->arg->init_cmd = delete_char(&(tmp->arg->init_cmd), i, len); // 히어독 없애버리기
+                i = i - 1;
                 here_doc(str);
                 tmp->infile = open(".heredoc_tmp", O_RDONLY); // 일단! 인파일 fd열고 시작
             }

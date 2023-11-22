@@ -1,5 +1,4 @@
-#include "minishell.h"
-
+#include "../includes/minishell.h"
 // 스트링 복사
 size_t	ft_strlcpy(char *dest, const char *src, size_t size)
 {

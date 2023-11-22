@@ -1,6 +1,6 @@
-#include "minishell.h"
+#include "../includes/minishell.h"
 
-int check_quote_2(char *str, char c) // 파이프와 따옴표 확인
+int count_str(char *str, char c) // 파이프와 따옴표 확인
 {
     int i;
     int flag[2];
@@ -10,25 +10,29 @@ int check_quote_2(char *str, char c) // 파이프와 따옴표 확인
     count = 0;
     flag[0] = 0;
     flag[1] = 0;
+    printf("str: %s\n", str);
     while (str[i])
     {
-        while (str[i] && str[i] == c)
+        while (str[i] == c)
             i++;
         if (str[i] == '\"' || str[i] == '\'')
             flag[str[i] % 2] = 1 - flag[str[i] % 2];
-        if (str[i] && (str[i] != c || flag[0] == 1 || flag[1] == 1)) //따옴표 안이 아닐 경우
+        if (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1)) //따옴표 안인경우
         {
             count++;
             while (str[i] && (str[i] != c || flag[0] == 1 || flag[1] == 1))
+            {
+                if (str[i] == '\"' || str[i] == '\'')
+                    flag[str[i] % 2] = 1 - flag[str[i] % 2];
                 i++;
-            i--;
+            }
         }
-        i++;
     }
+    printf("count : %d\n", count);
     return (count);
 }
 
-int check_quote(char *str, char c) // 파이프와 따옴표 확인
+int count_char(char *str, char c) // 파이프와 따옴표 확인
 {
     int i;
     int flag[2];
@@ -66,7 +70,7 @@ int get_malloc_list(char *str, t_cmd *start)
     t_cmd *tmp;
 
     tmp = start;
-    count = check_quote(str, '|');
+    count = count_char(str, '|'); // 파이프 개수 세기 - 따옴펴/연속파이프 처리
     if (count < 0)
     {
         printf("syntax error\n");
@@ -133,9 +137,7 @@ int get_init_cmd_list(char *str, t_cmd *start, int pipe_n)
     pip[pipe_n + 1] = i;
     if (parse_by_pipe(pip, str, &start, pipe_n))
         return (1);
-    check_redirect(&start);
-    printf("cmd : %s\n", start->arg->init_cmd);
-    //parse_by_space(&start, pipe_n);
-    //parse_by_quote(&start);
+    if (check_redirect(&start))
+        return (1);
     return (0);
 }

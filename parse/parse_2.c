@@ -1,4 +1,4 @@
-#include "minishell.h"
+#include "../includes/minishell.h"
 
 char *get_str(char *str, int k, int tmp, char *res)
 {
@@ -42,8 +42,7 @@ int set_space_parse(char ***parse, char *str)
 
     i = 0;
     k = 0;
-    printf("l : %d\n", check_quote_2(str, ' '));
-    while (i < check_quote_2(str, ' '))
+    while (i < count_str(str, ' '))
     {
         (*parse)[i] = get_len(str, &k, &tmp);
         if (!(*parse)[i])
@@ -55,18 +54,14 @@ int set_space_parse(char ***parse, char *str)
     return (0);
 }
 
-int parse_by_space(t_cmd **start, int pipe_n)
+int parse_by_space(t_cmd **start)
 {
-    int i;
     t_cmd *tmp;
 
-    i = 0;
     tmp = (*start);
-    while (tmp && i < pipe_n + 1)
+    while (tmp)
     {
-        tmp->arg->parse = malloc(sizeof(char *) * (check_quote(tmp->arg->init_cmd, ' ') + 2));
-        set_space_parse(&(tmp->arg->parse), tmp->arg->init_cmd);
-        i++;
+        tmp->arg->parse = ft_split(tmp->arg->init_cmd, ' ');
         tmp = tmp->next;
     }
     return (0);

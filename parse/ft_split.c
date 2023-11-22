@@ -6,28 +6,37 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/26 10:53:47 by man               #+#    #+#             */
-/*   Updated: 2023/11/15 16:20:55 by man              ###   ########.fr       */
+/*   Updated: 2023/11/22 17:37:54 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../includes/minishell.h"
 
 static int	get_ac(char const *str, char c)
 {
 	int	i;
 	int	count;
+    int flag[2];
 
 	count = 0;
 	i = 0;
+    flag[0] = 0;
+    flag[1] = 0;
 	while (str[i])
 	{
 		while (str[i] == c)
 			i++;
-		if (str[i] != c && str[i])
+        if (str[i] == '\"' || str[i] == '\'')
+            flag[str[i] % 2] = 1 - flag[str[i] % 2];
+		if (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1))
 		{
 			count++;
-			while (str[i] != c && str[i])
+			while (str[i] && (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1)))
+            {
+                if (str[i] == '\"' || str[i] == '\'')
+                    flag[str[i] % 2] = 1 - flag[str[i] % 2];
 				i++;
+            }
 		}
 	}
 	return (count);
@@ -50,11 +59,16 @@ static char	**ft_free(char **str)
 static char	*get_len(char const *str, char c, int *k, int *tmp)
 {
 	char	*res;
-
+    int flag[2];
+    
+    flag[0] = 0;
+    flag[1] = 0;
 	while (str[*k] == c)
 		(*k)++;
+    if (str[*k] == '\"' || str[*k] == '\'')
+        flag[str[*k] % 2] = 1 - flag[str[*k] % 2];
 	*tmp = *k;
-	while (str[*k] != c && str[*k])
+	while (str[*k] && (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1))
 		(*k)++;
 	res = (char *)malloc(sizeof(char) * (*k - *tmp + 1));
 	return (res);

@@ -1,7 +1,7 @@
 // 연결리스트의 이차원 배열을 돌기 -> 삼중반복문
 
-#include "minishell.h"
-
+#include "../includes/minishell.h"
+/*
 int parse_by_quote(t_cmd **start)
 {
     int i;
@@ -30,4 +30,4 @@ int parse_by_quote(t_cmd **start)
         tmp = tmp -> next;
     }
     return (0);
-}
+} */
