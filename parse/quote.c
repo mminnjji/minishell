@@ -13,15 +13,15 @@ int parse_by_quote(t_cmd **start)
     while (tmp)
     {
         i = 0;
-        while (tmp->arg->parse[i])
+        while (tmp->cmd[i])
         {
             j = 0;
-            while (tmp->arg->parse[i][j])
+            while (tmp->cmd[i][j])
             {
-                if (tmp->arg->parse[i][j] == '\'' || tmp->arg->parse[i][j] == '\"')
+                if (tmp->cmd[i][j] == '\'' || tmp->cmd[i][j] == '\"')
                 {   
-                    
-                    tmp->arg->parse[i] = delete_char(&tmp->arg->parse[i], j, 1);
+
+                    tmp->cmd[i] = delete_char(&tmp->cmd[i], j, 1);
                     j--;
                 }
                 j++;

@@ -47,7 +47,6 @@ int get_malloc_list(char *str, t_cmd *start)
     i = 0;
     while (i++ < count)
     {
-        start->arg = malloc(sizeof(t_arg));
         start->next = malloc(sizeof(t_cmd));
         start = start->next;
     }
@@ -65,15 +64,12 @@ int parse_by_pipe(int pip[], char *str, t_cmd **start, int pipe_n)
     tmp = (*start);
     while (tmp && i < pipe_n + 1)
     {
-        tmp->arg = malloc(sizeof(t_arg));
-        if (!tmp->arg)
-            return (1); // 이경우에 이전에 할당된 구조체 연결리스트 + else 해제
-        tmp->arg->init_cmd = malloc(sizeof(char) * (pip[i + 1] - pip[i] + 2));
-        if (!tmp->arg->init_cmd)
+        tmp->init_cmd = malloc(sizeof(char) * (pip[i + 1] - pip[i] + 2));
+        if (!tmp->init_cmd)
             return (1); // 동일
-        ft_strlcpy(tmp->arg->init_cmd, (const char *)(str + pip[i]), pip[i + 1] - pip[i] + 1);
-        if (tmp->arg->init_cmd[strlen(tmp->arg->init_cmd) - 1] == '|')
-            tmp->arg->init_cmd[strlen(tmp->arg->init_cmd) - 1] = 0;
+        ft_strlcpy(tmp->init_cmd, (const char *)(str + pip[i]), pip[i + 1] - pip[i] + 1);
+        if (tmp->init_cmd[strlen(tmp->init_cmd) - 1] == '|')
+            tmp->init_cmd[strlen(tmp->init_cmd) - 1] = 0;
         tmp = tmp->next;
         i++;
     }

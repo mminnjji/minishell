@@ -12,20 +12,14 @@
 
 int exit_code; // $? 치환하는 종료코드
 
-typedef struct s_arg
-{
-    char *init_cmd;
-    char **parse;
-    char **f_parse;
-} t_arg;
 
 typedef struct s_cmd
 {
-    struct s_arg *arg;
+    char *init_cmd;
     char    **cmd;
     int infile;
     int outfile;
-    int idx;
+    int idx; // 이게 머임..?
     int outfile_flag; // 0일때 그냥 입력 + 1일떄 추가입력
     struct s_cmd *next;
 } t_cmd;

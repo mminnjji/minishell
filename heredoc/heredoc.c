@@ -134,15 +134,15 @@ int check_heredoc(t_cmd **start, int flag[])
         i = 0;
         tmp->infile = 1; // stdin;
         tmp->outfile = 0; // stdout;
-        while (tmp->arg->init_cmd[i])
+        while (tmp->init_cmd[i])
         {
-            if (tmp->arg->init_cmd[i] == '\"' || tmp->arg->init_cmd[i] == '\'')
-                flag[tmp->arg->init_cmd[i] % 2] = 1 - flag[tmp->arg->init_cmd[i] % 2];
-            if (!ft_strncmp(tmp->arg->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
+            if (tmp->init_cmd[i] == '\"' || tmp->init_cmd[i] == '\'')
+                flag[tmp->init_cmd[i] % 2] = 1 - flag[tmp->init_cmd[i] % 2];
+            if (!ft_strncmp(tmp->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
             {
-                str = get_heredoc(tmp->arg->init_cmd, i + 2, &len);
+                str = get_heredoc(tmp->init_cmd, i + 2, &len);
                 str = remove_quote(str);
-                tmp->arg->init_cmd = delete_char(&(tmp->arg->init_cmd), i, len); // 히어독 없애버리기
+                tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
                 i = i - 1;
                 here_doc(str);
                 tmp->infile = open(".heredoc_tmp", O_RDONLY); // 일단! 인파일 fd열고 시작
