@@ -1,7 +1,7 @@
 #include "../includes/minishell.h"
 // int exit_code
 // 실행부
-void work_cmd(char *str)
+void work_cmd(char *str, char **envp)
 {
     t_cmd *start;
     int pipe_count;
@@ -24,7 +24,7 @@ void work_cmd(char *str)
         return ;
     }
     parse_by_space(&start);
-    parse_by_quote(&start);
+    parse_by_quote(&start, envp);
     while (start)
     {
         int i = 0;
@@ -38,16 +38,16 @@ void work_cmd(char *str)
     }
 }
 
-int main()//int argc, char **argv, char *envp[])
+int main(int argc, char **argv, char *envp[])
 {
     char *str;
-
-    
+    argc = 1;
+    (void)argv;
     while (1)
     {
         str = readline("minishell-3.2$ "); //문자열 받아서 실행
         if (str)
-            work_cmd(str);// 문자열이 들어왔을 경우
+            work_cmd(str, envp);// 문자열이 들어왔을 경우
         else
             break;
         add_history(str); // 스트링 히스토리 기록
