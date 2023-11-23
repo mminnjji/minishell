@@ -6,7 +6,7 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/26 10:53:47 by man               #+#    #+#             */
-/*   Updated: 2023/11/22 17:37:54 by man              ###   ########.fr       */
+/*   Updated: 2023/11/23 14:11:47 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,11 @@ static int	get_ac(char const *str, char c)
 			i++;
         if (str[i] == '\"' || str[i] == '\'')
             flag[str[i] % 2] = 1 - flag[str[i] % 2];
-		if (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1))
+		if (str[i] && (str[i] != c || (str[i] == c && (flag[0] == 1 || flag[1] == 1))))
 		{
 			count++;
-			while (str[i] && (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1)))
+			i++;
+			while (str[i] && (str[i] != c || (str[i] == c && (flag[0] == 1 || flag[1] == 1))))
             {
                 if (str[i] == '\"' || str[i] == '\'')
                     flag[str[i] % 2] = 1 - flag[str[i] % 2];
@@ -42,7 +43,7 @@ static int	get_ac(char const *str, char c)
 	return (count);
 }
 
-static char	**ft_free(char **str)
+static char	**ft_freee(char **str)
 {
 	size_t	j;
 
@@ -68,8 +69,12 @@ static char	*get_len(char const *str, char c, int *k, int *tmp)
     if (str[*k] == '\"' || str[*k] == '\'')
         flag[str[*k] % 2] = 1 - flag[str[*k] % 2];
 	*tmp = *k;
-	while (str[*k] && (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1))
+	while (str[*k] && (str[*k] != c || (str[*k] == c && (flag[0] == 1 || flag[1] == 1))))
+	{
 		(*k)++;
+		if (str[*k] && (str[*k] == '\"' || str[*k] == '\''))
+        	flag[str[*k] % 2] = 1 - flag[str[*k] % 2];
+	}
 	res = (char *)malloc(sizeof(char) * (*k - *tmp + 1));
 	return (res);
 }
@@ -104,7 +109,7 @@ char	**ft_split(char const *str, char c)
 	{
 		res[i] = get_len(str, c, &k, &tmp);
 		if (!res[i])
-			return (ft_free(res));
+			return (ft_freee(res));
 		res[i] = get_str(str, k, tmp, res[i]);
 		i++;
 	}

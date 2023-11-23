@@ -1,13 +1,17 @@
 #include "../includes/minishell.h"
 // int exit_code
 // 실행부
-void work_cmd(char *str)
+void work_cmd(char *str, char **envp)
 {
     t_cmd *start;
     int pipe_count;
 
     start = malloc(sizeof(t_cmd));
-    //말록오류 처리 필
+    if (!start)
+    {
+        perror("Error:");
+        return ;
+    }
     pipe_count = get_malloc_list(str, start); //구조체 할당
     if (pipe_count < 0) // 두개이상의 연속된 파이프 -> 신택스 에러로 cmd 종료 // 다음 cmd는 받을 수 있도록 처리
     {
@@ -20,7 +24,7 @@ void work_cmd(char *str)
         return ;
     }
     parse_by_space(&start);
-    //parse_by_quote(&start);
+    parse_by_quote(&start);
     while (start)
     {
         int i = 0;
@@ -34,7 +38,7 @@ void work_cmd(char *str)
     }
 }
 
-int main()
+int main(int argc, char **argv, char *envp[])
 {
     char *str;
 
@@ -43,7 +47,7 @@ int main()
     {
         str = readline("minishell-3.2$ "); //문자열 받아서 실행
         if (str)
-            work_cmd(str);// 문자열이 들어왔을 경우
+            work_cmd(str, envp);// 문자열이 들어왔을 경우
         else
             break;
         add_history(str); // 스트링 히스토리 기록

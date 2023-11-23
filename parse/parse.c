@@ -1,37 +1,5 @@
 #include "../includes/minishell.h"
 
-int count_str(char *str, char c) // 파이프와 따옴표 확인
-{
-    int i;
-    int flag[2];
-    int count;
-
-    i = 0;
-    count = 0;
-    flag[0] = 0;
-    flag[1] = 0;
-    printf("str: %s\n", str);
-    while (str[i])
-    {
-        while (str[i] == c)
-            i++;
-        if (str[i] == '\"' || str[i] == '\'')
-            flag[str[i] % 2] = 1 - flag[str[i] % 2];
-        if (str[i] != c || str[i] == c && (flag[0] == 1 || flag[1] == 1)) //따옴표 안인경우
-        {
-            count++;
-            while (str[i] && (str[i] != c || flag[0] == 1 || flag[1] == 1))
-            {
-                if (str[i] == '\"' || str[i] == '\'')
-                    flag[str[i] % 2] = 1 - flag[str[i] % 2];
-                i++;
-            }
-        }
-    }
-    printf("count : %d\n", count);
-    return (count);
-}
-
 int count_char(char *str, char c) // 파이프와 따옴표 확인
 {
     int i;
