@@ -1,10 +1,48 @@
 #include "../includes/minishell.h"
 
-char	*get_path(char **envp, char **str)
+char *append_str(char **str, int i, char *tmp)
+{
+    int j;
+    int k;
+    char *res;
+
+    j = 0;
+    k = 0;
+    res = malloc(sizeof(char) * (ft_strlen((*str)) + ft_strlen(tmp) + 1));
+    while ((*str)[j])
+    {
+        if (j == i)
+        {
+            while (tmp[k])
+            {
+                res[j + k] = tmp[k];
+                k++;
+            }
+        }
+        res[j + k] = (*str)[j];
+        j++;
+    }
+    res[j + k] = 0;
+    if ((*str)[0] != '?' && (*str)[0] != 0)
+        free(tmp);
+    free(*str);
+    return (res);
+}
+
+char	*get_path(char **envp, char **str, int idx)
 {
     int i;
+    char *res;
 
     i = 0;
+    res = ft_itoa(exit_code);
+    if ((*str)[0] == '?')
+    {
+        if (idx == 0)
+            return (res);
+        else
+            return ("0");
+    }
 	while (*envp)
     {
         while ((*str)[i])
@@ -16,62 +54,53 @@ char	*get_path(char **envp, char **str)
         if (i == (int)strlen((*str)))
         {
             if ((*envp)[i] == '=')
+            {
+                free(*str);
                 return ((*envp) + i + 1);
+            }
         }
 		envp++;
     }
+    free(*str);
     return ("");
 }
-
-void replace_char(char *env, char *r_env, int j)
+//j지점이 환경변수 바로 다음인덱스 녀석임 - 그러니 만약 tmp ~ j라면 3 ~ 5 // j - tmp + 2
+char *get_env(char *str, int j)
 {
+    int tmp;
     int i;
-
-    i = 0;
-    while (r_env[i])
-    {
-        env[j + i] = r_env[i]; // $~ 을 바꾸는 중,,
-        i++;
-    }
-}
-
-char *replace_env(char **str, int j, char **envp)
-{
-    int i;
-    int l;
-    int k;
     char *env;
-    char *r_env;
 
+    tmp = j;
     i = 0;
-    l = -1;
-    k = 0;
-    while ((*str)[j + i + 1] && (*str)[j + i + 1] != '\'' && (*str)[j + i + 1] != '\"' \
-    && (*str)[j + i + 1] != '$' && (*str)[j + i + 1] != ' ')
-        i++;
-    env = malloc(sizeof(char) * (i + 1));
-    while (++l < i)
-        env[l] = (*str)[j + l + 1];
-    env[l] = 0;
-    printf("env:%s\n", env);
-    r_env = get_path(envp, &env);
-    free(env);
-    l = 0;
-    env = malloc(sizeof(char) * (ft_strlen((*str)) + ft_strlen(r_env) - i + 1));
-    while ((*str)[l])
+    if (str[j] == '?')
+        return ("?");
+    while (str[j])
     {
-        if (l == j) 
-        {
-            replace_char(env, r_env, j);
-            l = l + i + 1;
-            k = k + ft_strlen(r_env);
-        }
-        else
-        {
-            env[k] = (*str)[l];   
-            l++;
-            k++;
-        }
+        if (str[j] == '\"' || str[j] == '\'' || str[j] == '$' || str[j] == ' ' || str[j] == '?')
+            break;
+        j++;
+    }
+    env = malloc(sizeof(char) * (j - tmp + 1));
+    while (tmp < j)
+    {
+        env[i] = str[tmp];
+        tmp++;
+        i++;
     }
     return (env);
+}
+
+char *replace_env(char **str, int j, char **envp, int idx)
+{
+    char *env;
+    char *rep;
+    int len;
+
+    env = get_env((*str), j + 1); // 환경변수가 가리키는 부분 찾기
+    len = ft_strlen(env);
+    rep = get_path(envp, &env, idx);
+    (*str) = delete_char(str, j, len + 1);
+    (*str) = append_str(str, j, rep);
+    return (*str);
 }

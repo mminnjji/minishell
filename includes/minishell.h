@@ -29,7 +29,7 @@ size_t	ft_strlcpy(char *dest, const char *src, size_t size);
 int get_init_cmd_list(char *str, t_cmd *start, int pipe_n);
 int get_malloc_list(char *str, t_cmd *start);
 int parse_by_space(t_cmd **start);
-int parse_by_quote(t_cmd **start, char **envp);
+int parse_by_quote(t_cmd **start);
 int count_char(char *str, char c);
 int count_str(char *str, char c);
 int	ft_strncmp(char *s1, char *s2, size_t n);
@@ -39,6 +39,8 @@ int here_doc(char *str);
 char *get_heredoc(char *str, int n, int *len);
 int check_heredoc(t_cmd **start, int flag[]);
 int check_redirect(t_cmd **start);
-char *replace_env(char **str, int j, char **envp);
+char *replace_env(char **str, int j, char **envp, int idx);
+char	*ft_itoa(int n);
+int check_envp(t_cmd **start, char **envp);
 
 #endif

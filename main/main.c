@@ -24,7 +24,8 @@ void work_cmd(char *str, char **envp)
         return ;
     }
     parse_by_space(&start);
-    parse_by_quote(&start, envp);
+    check_envp(&start, envp);
+    //parse_by_quote(&start);
     while (start)
     {
         int i = 0;
