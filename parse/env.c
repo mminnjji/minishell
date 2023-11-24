@@ -36,6 +36,7 @@ char *append_str(char **str, int i, char *tmp)
 char	*get_path(char **envp, char **str, int idx)
 {
     int i;
+    int j;
     char *res;
 
     i = 0;
@@ -47,23 +48,24 @@ char	*get_path(char **envp, char **str, int idx)
         else
             return ("0");
     }
-	while (*envp)
+	while (envp[i])
     {
-        while ((*str)[i])
+        j = 0;
+        while ((*str)[j])
         {
-            if ((*envp)[i] != (*str)[i])
+            if (envp[i][j] != (*str)[j])
                 break;
-            i++;
+            j++;
         }
-        if (i == ft_strlen((*str)))
+        if (j == ft_strlen((*str)))
         {
-            if ((*envp)[i] == '=')
+            if (envp[i][j] == '=')
             {
                 free(*str);
-                return ((*envp) + i + 1);
+                return (delete_char(&envp[i], 0, j + 1));
             }
         }
-		envp++;
+		i++;
     }
     free(*str);
     return ("");

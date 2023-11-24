@@ -35,7 +35,7 @@ char *delete_char(char **str, int i, int n)
         j++;
     }
     res[k] = 0;
-    free((*str));
+    //free((*str));
     return (res);
 }
 

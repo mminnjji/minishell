@@ -34,7 +34,7 @@ void work_cmd(char *str, char **envp)
             printf("pcmd: %s\n", start->cmd[i]);
             i++;
         }
-        printf("cmd : %s, in : %d, out : %d\n", start->init_cmd, start->infile, start->outfile);
+        printf("cmd : %s in : %d, out : %d\n", start->init_cmd, start->infile, start->outfile);
         start = start->next;
     }
 }
@@ -44,13 +44,7 @@ int main(int argc, char **argv, char *envp[])
     char *str;
     argc = 1;
     (void)argv;
-    int i = 0;
 
-    while (envp[i])
-    {
-        printf("envp[%d] : %s\n", i, envp[i]);
-        i++;
-    }
     while (1)
     {
         str = readline("minishell-3.2$ "); //문자열 받아서 실행
