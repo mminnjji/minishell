@@ -25,7 +25,7 @@ void work_cmd(char *str, char **envp)
     }
     parse_by_space(&start);
     check_envp(&start, envp);
-    //parse_by_quote(&start);
+    parse_by_quote(&start);
     while (start)
     {
         int i = 0;
@@ -44,6 +44,13 @@ int main(int argc, char **argv, char *envp[])
     char *str;
     argc = 1;
     (void)argv;
+    int i = 0;
+
+    while (envp[i])
+    {
+        printf("envp[%d] : %s\n", i, envp[i]);
+        i++;
+    }
     while (1)
     {
         str = readline("minishell-3.2$ "); //문자열 받아서 실행

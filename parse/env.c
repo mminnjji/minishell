@@ -8,6 +8,11 @@ char *append_str(char **str, int i, char *tmp)
 
     j = 0;
     k = 0;
+    if ((*str)[0] == 0)
+    {
+        free(*str);
+        return (tmp);
+    }
     res = malloc(sizeof(char) * (ft_strlen((*str)) + ft_strlen(tmp) + 1));
     while ((*str)[j])
     {
@@ -23,8 +28,7 @@ char *append_str(char **str, int i, char *tmp)
         j++;
     }
     res[j + k] = 0;
-    if ((*str)[0] != '?' && (*str)[0] != 0)
-        free(tmp);
+    printf("res: %s\n", res);
     free(*str);
     return (res);
 }
@@ -51,7 +55,7 @@ char	*get_path(char **envp, char **str, int idx)
                 break;
             i++;
         }
-        if (i == (int)strlen((*str)))
+        if (i == ft_strlen((*str)))
         {
             if ((*envp)[i] == '=')
             {
@@ -88,6 +92,8 @@ char *get_env(char *str, int j)
         tmp++;
         i++;
     }
+    env[i] = 0;
+    printf("env: %s\n", env);
     return (env);
 }
 
@@ -101,6 +107,8 @@ char *replace_env(char **str, int j, char **envp, int idx)
     len = ft_strlen(env);
     rep = get_path(envp, &env, idx);
     (*str) = delete_char(str, j, len + 1);
+    printf("rep: %s\n", rep);
     (*str) = append_str(str, j, rep);
+    printf("*str: %s\n", *str);
     return (*str);
 }

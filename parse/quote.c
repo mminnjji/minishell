@@ -24,7 +24,11 @@ int check_envp(t_cmd **start, char **envp)
                 if (tmp->cmd[i][j] == '\'')
                     flag = 1 - flag;
                 if (tmp->cmd[i][j] == '$' && flag != 1)
-                    replace_env(&(tmp->cmd[i]), j, envp, idx);
+                {
+                    tmp->cmd[i] = replace_env(&(tmp->cmd[i]), j, envp, idx);
+                    printf("tmp->cmd[%d] : %s\n", i, tmp->cmd[i]);
+                    j--;
+                }
             }
         }
         tmp = tmp -> next;
@@ -50,7 +54,10 @@ int parse_by_quote(t_cmd **start)
             while (tmp->cmd[i][++j])
             {
                 if (tmp->cmd[i][j] == '\"' || tmp->cmd[i][j] == '\'')
+                {
                     tmp->cmd[i] = delete_char(&(tmp->cmd[i]), j, 1);
+                    j--;
+                }
             }
         }
         tmp = tmp -> next;
