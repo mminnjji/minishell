@@ -77,7 +77,7 @@ int parse_by_pipe(int pip[], char *str, t_cmd **start, int pipe_n)
 }
 
 //pipe 위치를 기준으로 파싱하여 구조체에 넣어줌
-int get_init_cmd_list(char *str, t_cmd *start, int pipe_n) 
+int get_init_cmd_list(char *str, t_cmd **start, int pipe_n) 
 {
     int i;
     int j;
@@ -99,9 +99,8 @@ int get_init_cmd_list(char *str, t_cmd *start, int pipe_n)
             pip[++j] = i + 1;
     }
     pip[pipe_n + 1] = i;
-    if (parse_by_pipe(pip, str, &start, pipe_n))
+    if (parse_by_pipe(pip, str, start, pipe_n))
         return (1);
-    if (check_redirect(&start))
-        return (1);
+    check_redirect(start);
     return (0);
 }

@@ -16,7 +16,6 @@ int check_redirect_in(t_cmd **tmp, int flag[])
         {
             str = get_heredoc((*tmp)->init_cmd, i + 1, &len);
             str = remove_quote(str);
-            //printf("str: %s ilen: %d, i : %d", str, len, i);
             (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len);
             i = i - 1;
             (*tmp)->infile = open(str, O_RDONLY);
@@ -79,7 +78,6 @@ int check_predirect(t_cmd **start, int flag[])
                 str = get_heredoc(tmp->init_cmd, i + 2, &len);
                 str = remove_quote(str);
                 tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
-                printf("str: %s len: %d, i : %d", tmp->init_cmd, len, i);
                 i = i - 1;
                 tmp->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
                 if (tmp->outfile < 0)
@@ -93,9 +91,33 @@ int check_predirect(t_cmd **start, int flag[])
     return (0);
 }
 
+void	delete_node(t_cmd **cur_lst, t_cmd **origin)
+{
+	t_cmd	*prev_node;
+	t_cmd	*current_node;
 
+	prev_node = NULL;
+	current_node = *origin;
+	if (*cur_lst == NULL || origin == NULL || *origin == NULL)
+		return ;
+	while (current_node != NULL)
+	{
+		if (current_node == (*cur_lst))
+			break ;
+		prev_node = current_node;
+		current_node = current_node->next;
+	}
+	if (current_node == NULL)
+		return ;
+	if (prev_node == NULL)
+		*origin = current_node->next;
+	else
+		prev_node->next = current_node->next;
+    free(current_node->init_cmd);
+	free(current_node);
+}
 
-int check_redirect(t_cmd **start)
+t_cmd *check_redirect(t_cmd **start)
 {
     t_cmd *tmp;
     int flag[2];
@@ -104,14 +126,23 @@ int check_redirect(t_cmd **start)
     flag[0] = 0;
     flag[1] = 0;
     check_heredoc(start, flag);
-    check_predirect(start, flag);
     while (tmp)
     {
         if (check_redirect_in(&tmp, flag))
-            return (1);
-        if (check_redirect_out(&tmp, flag))
-            return (1);
+        {
+            delete_node(&tmp, start);
+            perror("Error");
+            tmp = (*start);
+        }
+        else
+            tmp = tmp->next;
+    }
+    check_predirect(start, flag);
+    tmp = (*start);
+    while (tmp)
+    {
+        check_redirect_out(&tmp, flag);
         tmp = tmp->next;
     }
-    return (0);
+    return (*start);
 }

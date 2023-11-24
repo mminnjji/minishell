@@ -26,7 +26,6 @@ int check_envp(t_cmd **start, char **envp)
                 if (tmp->cmd[i][j] == '$' && flag != 1)
                 {
                     tmp->cmd[i] = replace_env(&(tmp->cmd[i]), j, envp, idx);
-                    printf("tmp->cmd[%d] : %s\n", i, tmp->cmd[i]);
                     j--;
                 }
             }

@@ -18,9 +18,9 @@ void work_cmd(char *str, char **envp)
         free(start);
         return ;
     }
-    if (get_init_cmd_list(str, start, pipe_count)) // 파이프로 분할된 연결리스트에 파이프 기준으로 자른 문자열 삽입
+    if (get_init_cmd_list(str, &start, pipe_count)) // 파이프로 분할된 연결리스트에 파이프 기준으로 자른 문자열 삽입
     {
-        printf("file open fail\n");
+        perror("Error");
         return ;
     }
     parse_by_space(&start);
@@ -31,7 +31,7 @@ void work_cmd(char *str, char **envp)
         int i = 0;
         while (start->cmd[i])
         {
-            printf("pcmd: %s\n", start->cmd[i]);
+            printf("[%d]: %s\n", i, start->cmd[i]);
             i++;
         }
         printf("cmd : %s in : %d, out : %d\n", start->init_cmd, start->infile, start->outfile);

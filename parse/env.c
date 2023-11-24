@@ -1,5 +1,31 @@
 #include "../includes/minishell.h"
 
+char *append_str2(char **str, int i, char *tmp)
+{
+    int j;
+    int k;
+    char *res;
+
+    j = 0;
+    k = 0;
+    res = malloc(sizeof(char) * (ft_strlen((*str)) + ft_strlen(tmp) + 1));
+    while ((*str)[j])
+    {
+        if (j == i)
+        {
+            while (tmp[k])
+            {
+                res[j + k] = tmp[k];
+                k++;
+            }
+        }
+        res[j + k] = (*str)[j];
+        j++;
+    }
+    res[j + k] = 0;
+    return (res);
+}
+
 char *append_str(char **str, int i, char *tmp)
 {
     int j;
@@ -28,7 +54,6 @@ char *append_str(char **str, int i, char *tmp)
         j++;
     }
     res[j + k] = 0;
-    printf("res: %s\n", res);
     free(*str);
     return (res);
 }
@@ -95,7 +120,6 @@ char *get_env(char *str, int j)
         i++;
     }
     env[i] = 0;
-    printf("env: %s\n", env);
     return (env);
 }
 
@@ -109,8 +133,6 @@ char *replace_env(char **str, int j, char **envp, int idx)
     len = ft_strlen(env);
     rep = get_path(envp, &env, idx);
     (*str) = delete_char(str, j, len + 1);
-    printf("rep: %s\n", rep);
     (*str) = append_str(str, j, rep);
-    printf("*str: %s\n", *str);
     return (*str);
 }

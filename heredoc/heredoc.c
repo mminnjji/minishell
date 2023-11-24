@@ -63,13 +63,17 @@ char *remove_quote(char *str)
 }
 
 //진짜. 히어독 -> 스트링이랑 비교해서 같은게 있을 때 탈출시켜줌 -> 이전 문자열 임시파일 저장
-int here_doc(char *str)
+int here_doc(char *str, int idx)
 {
     int file;
     char *line;
+    char *name;
+    char *sstr;
 
-    unlink(".heredoc_tmp");
-    file = open(".heredoc_tmp", O_CREAT | O_WRONLY | O_TRUNC, 0000644);
+    sstr = ".heredoc_tmp ";
+    name = append_str2(&sstr, 12, ft_itoa(idx));
+    unlink(name);
+    file = open(name, O_CREAT | O_WRONLY | O_TRUNC, 0000644);
     if (file < 0)
         return (1);
     while (1)
@@ -124,11 +128,14 @@ int check_heredoc(t_cmd **start, int flag[])
 {
     int i;
     int len;
+    int idx;
     t_cmd *tmp;
     char *str;
 
     tmp = (*start);
     len = 2;
+    exit_code = 0;
+    idx = 0;
     while (tmp)
     {
         i = 0;
@@ -144,12 +151,13 @@ int check_heredoc(t_cmd **start, int flag[])
                 str = remove_quote(str);
                 tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
                 i = i - 1;
-                here_doc(str);
+                here_doc(str, idx);
                 tmp->infile = open(".heredoc_tmp", O_RDONLY); // 일단! 인파일 fd열고 시작
             }
             i++;
         }
         tmp = tmp ->next;
+        idx++;
     }
     return (0);
 }
