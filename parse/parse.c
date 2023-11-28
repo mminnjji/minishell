@@ -39,8 +39,8 @@ int parse_by_pipe(char *str, t_cmd **start, int pipe_n)
         if (!tmp->init_cmd)
             return (1); // 동일
         ft_strlcpy(tmp->init_cmd, (const char *)(str + pip[i]), pip[i + 1] - pip[i] + 1);
-        if (tmp->init_cmd[strlen(tmp->init_cmd) - 1] == '|')
-            tmp->init_cmd[strlen(tmp->init_cmd) - 1] = 0;
+        if (tmp->init_cmd[ft_strlen(tmp->init_cmd) - 1] == '|')
+            tmp->init_cmd[ft_strlen(tmp->init_cmd) - 1] = 0;
         tmp = tmp->next;
         i++;
     }

@@ -31,10 +31,13 @@ int minishell_free(t_cmd **start)
     {
         n = tmp->next;
         free(tmp);
+		if (tmp->init_cmd)
+			free(tmp->init_cmd);
+		tmp->init_cmd = NULL;
         tmp = n;
     }
     start = NULL;
-    perror("Error");
+    //perror("Error");
     return(0);
 }
 

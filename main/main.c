@@ -15,7 +15,8 @@ int work_cmd(char *str, char **envp)
         return (minishell_free(&start));
     if (parse_by_pipe(str, &start, pipe_count))
         return (minishell_free(&start));
-    check_redirect(&start, envp);
+    if (check_redirect(&start, envp))
+        return (minishell_free(&start));
     parse_by_space(&start);
     check_envp(&start, envp);
     parse_by_quote(&start);
@@ -30,6 +31,7 @@ int work_cmd(char *str, char **envp)
         printf("cmd : %s in : %d, out : %d\n", start->init_cmd, start->infile, start->outfile);
         start = start->next;
     }
+    minishell_free(&start);
     return (0);
 }
 

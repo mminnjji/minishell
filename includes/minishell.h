@@ -35,7 +35,7 @@ int parse_by_quote(t_cmd **start);
 int count_char(char *str, char c);
 int count_str(char *str, char c);
 int	ft_strncmp(char *s1, char *s2, size_t n);
-char *delete_char(char **str, int i, int n);
+char *delete_char(char **str, int i, int n, int flag);
 char *remove_quote_env(char *str, char **envp, int idx);
 int here_doc(t_cmd **tmp, char **envp, int flag[]);
 char *get_heredoc(char *str, int n, int *len, int flag[]);
@@ -48,5 +48,6 @@ char *append_str2(char **str, int i, char *tmp);
 int minishell_free(t_cmd **start);
 int print_error(void);
 int r_heredoc(char *str, int idx);
+char *remove_quote_env_do_heredoc(t_cmd **tmp, char **envp, int flag[], int *i);
 
 #endif

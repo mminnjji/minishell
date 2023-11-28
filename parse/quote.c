@@ -51,7 +51,7 @@ int parse_by_quote(t_cmd **start)
             {
                 if (tmp->cmd[i][j] == '\"' || tmp->cmd[i][j] == '\'')
                 {
-                    tmp->cmd[i] = delete_char(&(tmp->cmd[i]), j, 1);
+                    tmp->cmd[i] = delete_char(&(tmp->cmd[i]), j, 1, 0);
                     j--;
                 }
             }

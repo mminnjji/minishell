@@ -87,7 +87,7 @@ char	*get_path(char **envp, char **str, int idx)
             if (envp[i][j] == '=')
             {
                 free(*str);
-                return (delete_char(&envp[i], 0, j + 1));
+                return (delete_char(&envp[i], 0, j + 1, 1));
             }
         }
 		i++;
@@ -130,9 +130,17 @@ char *replace_env(char **str, int j, char **envp, int idx)
     int len;
 
     env = get_env((*str), j + 1); // 환경변수가 가리키는 부분 찾기
+    if (!env)
+        return (NULL);
     len = ft_strlen(env);
     rep = get_path(envp, &env, idx);
-    (*str) = delete_char(str, j, len + 1);
+    if (!rep)
+        return (NULL);
+    (*str) = delete_char(str, j, len + 1, 0);
+    if (!(*str))
+        return (NULL);
     (*str) = append_str(str, j, rep);
+    if (!(*str))
+        return (NULL);
     return (*str);
 }
