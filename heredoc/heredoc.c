@@ -40,7 +40,7 @@ char *delete_char(char **str, int i, int n)
 }
 
 //따옴표 제거
-char *remove_quote(char *str)
+char *remove_quote_env(char *str, char **envp, int idx)
 {
     int i;
     int len;
@@ -55,6 +55,11 @@ char *remove_quote(char *str)
         {
             count++;
             str = delete_char(&str, i, 1);
+            i--;
+        }
+        if (str[i] == '$')
+        {
+            str = replace_env(&str, i, envp, idx);
             i--;
         }
         i++;
@@ -124,18 +129,16 @@ char *get_heredoc(char *str, int n, int *len)
     return (res);
 }
 
-int check_heredoc(t_cmd **start, int flag[])
+int check_heredoc(t_cmd **start, int flag[], char **envp)
 {
     int i;
     int len;
-    int idx;
     t_cmd *tmp;
     char *str;
 
     tmp = (*start);
     len = 2;
     exit_code = 0;
-    idx = 0;
     while (tmp)
     {
         i = 0;
@@ -148,16 +151,19 @@ int check_heredoc(t_cmd **start, int flag[])
             if (!ft_strncmp(tmp->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
             {
                 str = get_heredoc(tmp->init_cmd, i + 2, &len);
-                str = remove_quote(str);
+                str = remove_quote_env(str, envp, tmp->idx);
                 tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
                 i = i - 1;
-                here_doc(str, idx);
-                tmp->infile = open(".heredoc_tmp", O_RDONLY); // 일단! 인파일 fd열고 시작
+                here_doc(str, tmp->idx);
+                char *sstr;
+
+                sstr = ".heredoc_tmp ";
+                char *name = append_str2(&sstr, 12, ft_itoa(tmp->idx));
+                tmp->infile = open(name, O_RDONLY); // 일단! 인파일 fd열고 시작
             }
             i++;
         }
         tmp = tmp ->next;
-        idx++;
     }
     return (0);
 }

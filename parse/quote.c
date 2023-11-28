@@ -6,11 +6,9 @@ int check_envp(t_cmd **start, char **envp)
 {
     int i;
     int j;
-    int idx;
     int flag;
     t_cmd *tmp;
 
-    idx = 0;
     tmp = (*start);
     flag = 0;
     while (tmp)
@@ -25,13 +23,12 @@ int check_envp(t_cmd **start, char **envp)
                     flag = 1 - flag;
                 if (tmp->cmd[i][j] == '$' && flag != 1)
                 {
-                    tmp->cmd[i] = replace_env(&(tmp->cmd[i]), j, envp, idx);
+                    tmp->cmd[i] = replace_env(&(tmp->cmd[i]), j, envp, tmp->idx);
                     j--;
                 }
             }
         }
         tmp = tmp -> next;
-        idx++;
     }
     return (0);
 }

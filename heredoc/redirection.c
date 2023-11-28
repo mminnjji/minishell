@@ -1,6 +1,6 @@
 #include "../includes/minishell.h"
 //파이프 기준 파싱 -> 히어독 체크 -> 인아웃파일 넣기 (cmd 제외 날리기)-> 공백관련 스플릿 -> 따옴표 없애기
-int check_redirect_in(t_cmd **tmp, int flag[])
+int check_redirect_in(t_cmd **tmp, int flag[], char **envp)
 {
     int i;
     int len;
@@ -15,7 +15,7 @@ int check_redirect_in(t_cmd **tmp, int flag[])
         if ((*tmp)->init_cmd[i] == '<' && flag[0] == 0 && flag[1] == 0)
         {
             str = get_heredoc((*tmp)->init_cmd, i + 1, &len);
-            str = remove_quote(str);
+            str = remove_quote_env(str, envp, (*tmp)->idx);
             (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len);
             i = i - 1;
             (*tmp)->infile = open(str, O_RDONLY);
@@ -28,7 +28,7 @@ int check_redirect_in(t_cmd **tmp, int flag[])
 }
 
 
-int check_redirect_out(t_cmd **tmp, int flag[])
+int check_redirect_out(t_cmd **tmp, int flag[], char **envp)
 {
     int i;
     char *str;
@@ -43,7 +43,7 @@ int check_redirect_out(t_cmd **tmp, int flag[])
         if ((*tmp)->init_cmd[i] == '>' && flag[0] == 0 && flag[1] == 0)
         {
             str = get_heredoc((*tmp)->init_cmd, i + 1, &len);
-            str = remove_quote(str);
+            str = remove_quote_env(str, envp, (*tmp)->idx);
             (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len);
             i = i - 1;
             (*tmp)->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
@@ -56,7 +56,7 @@ int check_redirect_out(t_cmd **tmp, int flag[])
 }
 
 
-int check_predirect(t_cmd **start, int flag[])
+int check_predirect(t_cmd **start, int flag[], char **envp)
 {
     int i;
     int len;
@@ -76,7 +76,7 @@ int check_predirect(t_cmd **start, int flag[])
             if (!ft_strncmp(tmp->init_cmd + i, ">>", 2) && flag[0] == 0 && flag[1] == 0)
             {
                 str = get_heredoc(tmp->init_cmd, i + 2, &len);
-                str = remove_quote(str);
+                str = remove_quote_env(str, envp, tmp->idx);
                 tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
                 i = i - 1;
                 tmp->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
@@ -117,7 +117,7 @@ void	delete_node(t_cmd **cur_lst, t_cmd **origin)
 	free(current_node);
 }
 
-t_cmd *check_redirect(t_cmd **start)
+t_cmd *check_redirect(t_cmd **start, char **envp)
 {
     t_cmd *tmp;
     int flag[2];
@@ -125,10 +125,10 @@ t_cmd *check_redirect(t_cmd **start)
     tmp = (*start);
     flag[0] = 0;
     flag[1] = 0;
-    check_heredoc(start, flag);
+    check_heredoc(start, flag, envp);
     while (tmp)
     {
-        if (check_redirect_in(&tmp, flag))
+        if (check_redirect_in(&tmp, flag, envp))
         {
             delete_node(&tmp, start);
             perror("Error");
@@ -137,11 +137,11 @@ t_cmd *check_redirect(t_cmd **start)
         else
             tmp = tmp->next;
     }
-    check_predirect(start, flag);
+    check_predirect(start, flag, envp);
     tmp = (*start);
     while (tmp)
     {
-        check_redirect_out(&tmp, flag);
+        check_redirect_out(&tmp, flag, envp);
         tmp = tmp->next;
     }
     return (*start);
