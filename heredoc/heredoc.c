@@ -46,29 +46,32 @@ char *remove_quote_env(char *str, char **envp, int idx)
     int len;
     int count;
 
-    i = 0;
+    i = -1;
     count = 0;
     len = ft_strlen(str);
-    while (i <= len - count)
+    while (++i <= len - count)
     {
         if (str[i] == '\"' || str[i] == '\'')
         {
             count++;
             str = delete_char(&str, i, 1);
+            if (!str)
+                return (NULL);
             i--;
         }
         if (str[i] == '$')
         {
             str = replace_env(&str, i, envp, idx);
+            if (!str)
+                return (NULL);
             i--;
         }
-        i++;
     }
     return (str);
 }
 
 //진짜. 히어독 -> 스트링이랑 비교해서 같은게 있을 때 탈출시켜줌 -> 이전 문자열 임시파일 저장
-int here_doc(char *str, int idx)
+int r_heredoc(char *str, int idx)
 {
     int file;
     char *line;
@@ -97,72 +100,75 @@ int here_doc(char *str, int idx)
     return (0);
 }
 
-char *get_heredoc(char *str, int n, int *len)
+char *get_heredoc(char *str, int n, int *len, int flag[])
 {
     int i;
     int j;
-    int flag[2];
     char *res;
 
-    i = 0;
-    j = -1;
-    flag[0] = 0;
-    flag[1] = 0;
-    while (str[n + i] && str[n + i] == ' ')
-    {
-        (*len)++;
+    i = -1;
+    j = n;
+    while (str[n] && str[n] == ' ')
         n++;
-    }
-    while (str[n + i])
+    (*len) = n - j + (*len);
+    while (str[n + ++i])
     {
         if (str[n + i] == '\"' || str[n + i] == '\'')
             flag[str[n + i] % 2] = 1 - flag[str[n + i] % 2];
         if (flag[0] == 0 && flag[1] == 0 && str[n + i] == ' ')
             break;
         (*len)++;
-        i++;
     }
+    j = -1;
     res = malloc(sizeof(char) * (i + 1));
+    if (!res)
+        return (NULL);
     while (++j < i)
         res[j] = str[n + j];
     res[j] = 0;
     return (res);
 }
 
-int check_heredoc(t_cmd **start, int flag[], char **envp)
+int here_doc(t_cmd **tmp, char **envp, int flag[])
 {
     int i;
     int len;
-    t_cmd *tmp;
     char *str;
+    char *name;
+
+    len = 2;
+    i = -1;
+    while ((*tmp)->init_cmd[++i])
+    {
+        if ((*tmp)->init_cmd[i] == '\"' || (*tmp)->init_cmd[i] == '\'')
+            flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
+        if (!ft_strncmp((*tmp)->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
+        {
+            str = get_heredoc((*tmp)->init_cmd, i + 2, &len, flag);
+            if (!str)
+                return (-1);
+            str = remove_quote_env(str, envp, (*tmp)->idx);
+            (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len);
+            i--;
+            r_heredoc(str, (*tmp)->idx);
+            name = ".heredoc_tmp ";
+            name = append_str2(&name, 12, ft_itoa((*tmp)->idx));
+            (*tmp)->infile = open(name, O_RDONLY);
+        }
+    }
+    return (0);
+}
+
+int check_heredoc(t_cmd **start, int flag[], char **envp)
+{
+    t_cmd *tmp;
 
     tmp = (*start);
-    len = 2;
     exit_code = 0;
     while (tmp)
     {
-        i = 0;
-        tmp->infile = 1; // stdin;
-        tmp->outfile = 0; // stdout;
-        while (tmp->init_cmd[i])
-        {
-            if (tmp->init_cmd[i] == '\"' || tmp->init_cmd[i] == '\'')
-                flag[tmp->init_cmd[i] % 2] = 1 - flag[tmp->init_cmd[i] % 2];
-            if (!ft_strncmp(tmp->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
-            {
-                str = get_heredoc(tmp->init_cmd, i + 2, &len);
-                str = remove_quote_env(str, envp, tmp->idx);
-                tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
-                i = i - 1;
-                here_doc(str, tmp->idx);
-                char *sstr;
-
-                sstr = ".heredoc_tmp ";
-                char *name = append_str2(&sstr, 12, ft_itoa(tmp->idx));
-                tmp->infile = open(name, O_RDONLY); // 일단! 인파일 fd열고 시작
-            }
-            i++;
-        }
+        if (here_doc(&tmp, envp, flag))
+            return (-1);
         tmp = tmp ->next;
     }
     return (0);

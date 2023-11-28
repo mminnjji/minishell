@@ -16,7 +16,7 @@ int exit_code; // $? 치환하는 종료코드
 typedef struct s_cmd
 {
     char *init_cmd;
-    char    **cmd;
+    char **cmd;
     int infile;
     int outfile;
     int idx;
@@ -37,13 +37,16 @@ int count_str(char *str, char c);
 int	ft_strncmp(char *s1, char *s2, size_t n);
 char *delete_char(char **str, int i, int n);
 char *remove_quote_env(char *str, char **envp, int idx);
-int here_doc(char *str, int idx);
-char *get_heredoc(char *str, int n, int *len);
+int here_doc(t_cmd **tmp, char **envp, int flag[]);
+char *get_heredoc(char *str, int n, int *len, int flag[]);
 int check_heredoc(t_cmd **start, int flag[], char **envp);
-t_cmd *check_redirect(t_cmd **start, char **envp);
+int check_redirect(t_cmd **start, char **envp);
 char *replace_env(char **str, int j, char **envp, int idx);
 char	*ft_itoa(int n);
 int check_envp(t_cmd **start, char **envp);
 char *append_str2(char **str, int i, char *tmp);
+int minishell_free(t_cmd **start);
+int print_error(void);
+int r_heredoc(char *str, int idx);
 
 #endif

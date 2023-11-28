@@ -1,27 +1,5 @@
 #include "../includes/minishell.h"
-// int exit_code
-// 실행부
-int minishell_free(t_cmd **start)
-{
-    t_cmd *tmp;
-    t_cmd *n;
 
-    tmp = (*start);
-    while (tmp)
-    {
-        n = tmp->next;
-        free(tmp);
-        tmp = n;
-    }
-    start = NULL;
-    perror("Error");
-    return(0);
-}
-int print_error(void)
-{
-    perror("Error");
-    return (0);
-}
 int work_cmd(char *str, char **envp)
 {
     t_cmd *start;
@@ -63,7 +41,7 @@ int main(int argc, char **argv, char *envp[])
 
     while (1)
     {
-        str = readline("미니쉘이야!!:"); //문자열 받아서 실행
+        str = readline("minishell ⋆◡̎⋆ 1.0 $ "); //문자열 받아서 실행
         if (str)
             work_cmd(str, envp);
         else

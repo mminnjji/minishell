@@ -14,7 +14,7 @@ int check_redirect_in(t_cmd **tmp, int flag[], char **envp)
             flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
         if ((*tmp)->init_cmd[i] == '<' && flag[0] == 0 && flag[1] == 0)
         {
-            str = get_heredoc((*tmp)->init_cmd, i + 1, &len);
+            str = get_heredoc((*tmp)->init_cmd, i + 1, &len, flag);
             str = remove_quote_env(str, envp, (*tmp)->idx);
             (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len);
             i = i - 1;
@@ -42,7 +42,7 @@ int check_redirect_out(t_cmd **tmp, int flag[], char **envp)
             flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
         if ((*tmp)->init_cmd[i] == '>' && flag[0] == 0 && flag[1] == 0)
         {
-            str = get_heredoc((*tmp)->init_cmd, i + 1, &len);
+            str = get_heredoc((*tmp)->init_cmd, i + 1, &len, flag);
             str = remove_quote_env(str, envp, (*tmp)->idx);
             (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len);
             i = i - 1;
@@ -75,7 +75,7 @@ int check_predirect(t_cmd **start, int flag[], char **envp)
                 flag[tmp->init_cmd[i] % 2] = 1 - flag[tmp->init_cmd[i] % 2];
             if (!ft_strncmp(tmp->init_cmd + i, ">>", 2) && flag[0] == 0 && flag[1] == 0)
             {
-                str = get_heredoc(tmp->init_cmd, i + 2, &len);
+                str = get_heredoc(tmp->init_cmd, i + 2, &len, flag);
                 str = remove_quote_env(str, envp, tmp->idx);
                 tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len); // 히어독 없애버리기
                 i = i - 1;
@@ -117,7 +117,7 @@ void	delete_node(t_cmd **cur_lst, t_cmd **origin)
 	free(current_node);
 }
 
-t_cmd *check_redirect(t_cmd **start, char **envp)
+int check_redirect(t_cmd **start, char **envp)
 {
     t_cmd *tmp;
     int flag[2];
@@ -144,5 +144,5 @@ t_cmd *check_redirect(t_cmd **start, char **envp)
         check_redirect_out(&tmp, flag, envp);
         tmp = tmp->next;
     }
-    return (*start);
+    return (0);
 }
