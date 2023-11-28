@@ -1,16 +1,12 @@
 #include "../includes/minishell.h"
 //파이프 기준 파싱 -> 히어독 체크 -> 인아웃파일 넣기 (cmd 제외 날리기)-> 공백관련 스플릿 -> 따옴표 없애기
 
-
-
 int check_redirect_in(t_cmd **tmp, int flag[], char **envp)
 {
     int i;
-    int len;
     char *str;
 
     i = 0;
-    len = 1;
     while ((*tmp)->init_cmd[i])
     {
         if ((*tmp)->init_cmd[i] == '\"' || (*tmp)->init_cmd[i] == '\'')
@@ -34,26 +30,17 @@ int check_redirect_out(t_cmd **tmp, int flag[], char **envp)
 {
     int i;
     char *str;
-    int len;
 
     i = 0;
-    len = 1;
     while ((*tmp)->init_cmd[i])
     {
         if ((*tmp)->init_cmd[i] == '\"' || (*tmp)->init_cmd[i] == '\'')
             flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
         if ((*tmp)->init_cmd[i] == '>' && flag[0] == 0 && flag[1] == 0)
         {
-            str = get_heredoc((*tmp)->init_cmd, i + 1, &len, flag);
+            str = remove_quote_env_do_heredoc(tmp, NULL, flag, &i);
             if (!str)
                 return (1);
-            str = remove_quote_env(str, envp, (*tmp)->idx);
-            if (!str)
-                return (1);
-            (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, len, 0);
-            if (!((*tmp)->init_cmd))
-                return (1);
-            i = i - 1;
             (*tmp)->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
             if ((*tmp)->outfile < 0)
                 return (2);
@@ -67,12 +54,10 @@ int check_redirect_out(t_cmd **tmp, int flag[], char **envp)
 int check_predirect(t_cmd **start, int flag[], char **envp)
 {
     int i;
-    int len;
     t_cmd *tmp;
     char *str;
 
     tmp = (*start);
-    len = 2;
     while (tmp)
     {
         i = 0;
@@ -83,10 +68,7 @@ int check_predirect(t_cmd **start, int flag[], char **envp)
                 flag[tmp->init_cmd[i] % 2] = 1 - flag[tmp->init_cmd[i] % 2];
             if (!ft_strncmp(tmp->init_cmd + i, ">>", 2) && flag[0] == 0 && flag[1] == 0)
             {
-                str = get_heredoc(tmp->init_cmd, i + 2, &len, flag);
-                str = remove_quote_env(str, envp, tmp->idx);
-                tmp->init_cmd = delete_char(&(tmp->init_cmd), i, len, 0); // 히어독 없애버리기
-                i = i - 1;
+                str = remove_quote_env_do_heredoc(&tmp, envp, flag, i);
                 tmp->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
                 if (tmp->outfile < 0)
                     return (1);
@@ -125,6 +107,22 @@ void	delete_node(t_cmd **cur_lst, t_cmd **origin)
 	free(current_node);
 }
 
+
+int check_redirect_err(t_cmd **tmp, t_cmd **start, int err)
+{
+    if (err == 2)
+    {
+        delete_node(tmp, start);
+        perror("Error");
+        (*tmp) = (*start);
+    }
+    else if (err == 1)
+        return (1);
+    else 
+        (*tmp) = (*tmp)->next;
+    return (0);
+}
+
 int check_redirect(t_cmd **start, char **envp)
 {
     t_cmd *tmp;
@@ -138,32 +136,16 @@ int check_redirect(t_cmd **start, char **envp)
     while (tmp)
     {
         err = check_redirect_in(&tmp, flag, envp);
-        if (err == 2)
-        {
-            delete_node(&tmp, start);
-            perror("Error");
-            tmp = (*start);
-        }
-        else if (err == 1)
+        if (check_redirect_err(&tmp, start, err))
             return (1);
-        else 
-            tmp = tmp->next;
     }
     check_predirect(start, flag, envp);
     tmp = (*start);
     while (tmp)
     {
         err = check_redirect_out(&tmp, flag, envp);
-        if (err == 2)
-        {
-            delete_node(&tmp, start);
-            perror("Error");
-            tmp = (*start);
-        }
-        else if (err == 1)
+        if (check_redirect_err(&tmp, start, err))
             return (1);
-        else 
-            tmp = tmp->next;
     }
     return (0);
 }
