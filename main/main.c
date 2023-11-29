@@ -17,7 +17,8 @@ int work_cmd(char *str, char **envp)
         return (minishell_free(&start));
     if (check_redirect(&start, envp))
         return (minishell_free(&start));
-    parse_by_space(&start);
+    if (parse_by_space(&start))
+        return (minishell_free(&start));
     check_envp(&start, envp);
     parse_by_quote(&start);
     while (start)
