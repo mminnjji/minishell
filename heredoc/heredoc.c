@@ -1,198 +1,91 @@
-#include "../includes/minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heredoc.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/06 20:28:38 by man               #+#    #+#             */
+/*   Updated: 2023/12/22 13:00:55 by man              ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int	ft_strncmp(char *s1, char *s2, size_t n)
+#include "../minishell.h"
+
+int	break_line(t_cmd **tmp, char *name, int file, char *str)
 {
-	size_t	i;
+	char	*t_path;
 
-	i = 0;
-	while ((s1[i] != '\0' || s2[i] != '\0') && i < n)
-	{
-		if (s1[i] != s2[i])
-			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
-		i++;
-	}
+	t_path = ttyname(STDOUT_FILENO);
+	open(t_path, O_RDONLY);
+	(*tmp)->infile = open(name, O_RDONLY);
+	unlink(name);
+	ft_free2((void **)&str);
+	ft_free2((void **)&name);
+	close(file);
 	return (0);
 }
 
-// i 인덱스 문자 포함 n만큼 delete 하고 앞으로 당긴 새로운 문자열 생성
-char *delete_char(char **str, int i, int n, int flag)
+int	return_heredoc(int file, t_cmd **tmp, char **name, char **str)
 {
-    int j;
-    int k;
-    char *res;
-
-    res = malloc(sizeof(char) * (ft_strlen(*str) + 1));
-    if (!res)
-        return (NULL);
-    j = 0;
-    k = 0;
-    while ((*str)[j])
-    {
-        if (j == i)
-            j = j + n;
-        res[k] = (*str)[j];
-        if (!(*str)[j])
-            break;
-        k++;
-        j++;
-    }
-    res[k] = 0;
-    if (!flag)
-        free((*str));
-    return (res);
+	(*tmp)->infile = open(*name, O_RDONLY);
+	if ((*tmp)->infile < 0)
+		return (2);
+	unlink(*name);
+	ft_free2((void **)str);
+	ft_free2((void **)name);
+	close(file);
+	return (0);
 }
 
-//따옴표 제거
-char *remove_quote_env(char *str, char **envp, int idx)
+int	r_heredoc(t_cmd **tmp, char *str, char *name, char **envp)
 {
-    int i;
-    int len;
-    int count;
+	int		file;
+	char	*line;
 
-    i = -1;
-    count = 0;
-    len = ft_strlen(str);
-    while (++i <= len - count)
-    {
-        if (str[i] == '\"' || str[i] == '\'')
-        {
-            count++;
-            str = delete_char(&str, i, 1, 0);
-            if (!str)
-                return (NULL);
-            i--;
-        }
-        if (str[i] == '$')
-        {
-            str = replace_env(&str, i, envp, idx);
-            if (!str)
-                return (NULL);
-            i--;
-        }
-    }
-    return (str);
+	file = open(name, O_CREAT | O_WRONLY | O_TRUNC, 0000644);
+	if (file < 0)
+		return (2);
+	signal_check(3);
+	while (1)
+	{
+		write(1, "heredoc> ", 9);
+		line = get_next_line(0);
+		if (!line)
+			return (break_line(tmp, name, file, str));
+		if (!ft_strncmp2(str, line, ft_strlen(str)) \
+		&& ft_strlen(str) == (ft_strlen(line) - 1))
+			break ;
+		if (!(*tmp)->heredoc_flag)
+			if (remove_env(&line, envp, (*tmp)->idx, 1))
+				return (1);
+		write(file, line, ft_strlen(line));
+		free(line);
+	}
+	free(line);
+	return (return_heredoc(file, tmp, &name, &str));
 }
 
-//진짜. 히어독 -> 스트링이랑 비교해서 같은게 있을 때 탈출시켜줌 -> 이전 문자열 임시파일 저장
-int r_heredoc(char *str, int idx)
+char	*change_str(t_cmd **tmp, int flag[], int i, char **envp)
 {
-    int file;
-    char *line;
-    char *name;
-    char *sstr;
+	char	*str;
+	int		qflag[2];
 
-    sstr = ".heredoc_tmp ";
-    name = append_str2(&sstr, 12, ft_itoa(idx));
-    unlink(name);
-    file = open(name, O_CREAT | O_WRONLY | O_TRUNC, 0000644);
-    if (file < 0)
-        return (1);
-    while (1)
-    {
-        write(1, "heredoc> ", 9);
-        line = get_next_line(0);
-        if (!line)
-            return (0);
-        if (!ft_strncmp(str, line, ft_strlen(str)) && ft_strlen(str) == (ft_strlen(line) - 1))
-            break;
-        write(file, line, ft_strlen(line));
-        free(line);
-    }
-    free(line);
-    close(file);
-    return (0);
-}
-
-char *get_heredoc(char *str, int n, int *len, int flag[])
-{
-    int i;
-    int j;
-    char *res;
-
-    i = -1;
-    j = n;
-    while (str[n] && str[n] == ' ')
-        n++;
-    (*len) = n - j + (*len);
-    while (str[n + ++i])
-    {
-        if (str[n + i] == '\"' || str[n + i] == '\'')
-            flag[str[n + i] % 2] = 1 - flag[str[n + i] % 2];
-        if (flag[0] == 0 && flag[1] == 0 && str[n + i] == ' ')
-            break;
-        (*len)++;
-    }
-    j = -1;
-    res = malloc(sizeof(char) * (i + 1));
-    if (!res)
-        return (NULL);
-    while (++j < i)
-        res[j] = str[n + j];
-    res[j] = 0;
-    return (res);
-}
-
-char *remove_quote_env_do_heredoc(t_cmd **tmp, char **envp, int flag[], int *i)
-{
-    char *str;
-    char *name;
-    int len;
-
-    len = 1 + (envp != NULL);
-    str = get_heredoc((*tmp)->init_cmd, (*i) + len, &len, flag);
-    if (!str)
-        return (NULL);
-    str = remove_quote_env(str, envp, (*tmp)->idx);
-    if (!str)
-        return (NULL);
-    (*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), (*i), len, 0);
-    if (!(*tmp)->init_cmd)
-        return (NULL);
-    (*i)--;
-    return (str);
-}
-
-int here_doc(t_cmd **tmp, char **envp, int flag[])
-{
-    int i;
-    int err;
-    char *str;
-    char *name;
-
-    i = -1;
-    while ((*tmp)->init_cmd[++i])
-    {
-        if ((*tmp)->init_cmd[i] == '\"' || (*tmp)->init_cmd[i] == '\'')
-            flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
-        if (!ft_strncmp((*tmp)->init_cmd + i, "<<", 2) && flag[0] == 0 && flag[1] == 0)
-        {
-            str = remove_quote_env_do_heredoc(tmp, envp, flag, &i);
-            if (!str)
-                return (1);
-            err = r_heredoc(str, (*tmp)->idx);
-            if (err)
-                return (1);
-            name = ".heredoc_tmp ";
-            name = append_str2(&name, 12, ft_itoa((*tmp)->idx));
-            (*tmp)->infile = open(name, O_RDONLY);
-            if ((*tmp)->infile < 0)
-                return (1);
-        }
-    }
-    return (0);
-}
-
-int check_heredoc(t_cmd **start, int flag[], char **envp)
-{
-    t_cmd *tmp;
-
-    tmp = (*start);
-    exit_code = 0;
-    while (tmp)
-    {
-        if (here_doc(&tmp, envp, flag))
-            return (-1);
-        tmp = tmp ->next;
-    }
-    return (0);
+	qflag[0] = 0;
+	qflag[1] = 0;
+	str = get_heredoc(*tmp, i + flag[0], &flag[0], qflag);
+	if (!str)
+		return (NULL);
+	if (flag[1])
+	{
+		if (remove_env(&str, envp, (*tmp)->idx, 0))
+			return (NULL);
+	}
+	str = remove_quote(str);
+	if (!str)
+		return (NULL);
+	(*tmp)->init_cmd = delete_char(&((*tmp)->init_cmd), i, flag[0], 0);
+	if (!(*tmp)->init_cmd)
+		return (NULL);
+	return (str);
 }

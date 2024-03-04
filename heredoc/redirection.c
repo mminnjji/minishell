@@ -1,151 +1,101 @@
-#include "../includes/minishell.h"
-//파이프 기준 파싱 -> 히어독 체크 -> 인아웃파일 넣기 (cmd 제외 날리기)-> 공백관련 스플릿 -> 따옴표 없애기
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   redirection.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/06 19:46:22 by man               #+#    #+#             */
+/*   Updated: 2023/12/18 20:15:45 by man              ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int check_redirect_in(t_cmd **tmp, int flag[], char **envp)
+#include "../minishell.h"
+
+int	check_redirect_err(int err, int flag[])
 {
-    int i;
-    char *str;
-
-    i = 0;
-    while ((*tmp)->init_cmd[i])
-    {
-        if ((*tmp)->init_cmd[i] == '\"' || (*tmp)->init_cmd[i] == '\'')
-            flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
-        if ((*tmp)->init_cmd[i] == '<' && flag[0] == 0 && flag[1] == 0)
-        {
-            str = remove_quote_env_do_heredoc(tmp, NULL, flag, &i);
-            if (!str)
-                return (1);
-            (*tmp)->infile = open(str, O_RDONLY);
-            if ((*tmp)->infile < 0)
-                return (2);
-        }
-        i++;
-    }
-    return (0);
-}
-
-
-int check_redirect_out(t_cmd **tmp, int flag[], char **envp)
-{
-    int i;
-    char *str;
-
-    i = 0;
-    while ((*tmp)->init_cmd[i])
-    {
-        if ((*tmp)->init_cmd[i] == '\"' || (*tmp)->init_cmd[i] == '\'')
-            flag[(*tmp)->init_cmd[i] % 2] = 1 - flag[(*tmp)->init_cmd[i] % 2];
-        if ((*tmp)->init_cmd[i] == '>' && flag[0] == 0 && flag[1] == 0)
-        {
-            str = remove_quote_env_do_heredoc(tmp, NULL, flag, &i);
-            if (!str)
-                return (1);
-            (*tmp)->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
-            if ((*tmp)->outfile < 0)
-                return (2);
-        }
-        i++;
-    }
-    return (0);
-}
-
-
-int check_predirect(t_cmd **start, int flag[], char **envp)
-{
-    int i;
-    t_cmd *tmp;
-    char *str;
-
-    tmp = (*start);
-    while (tmp)
-    {
-        i = 0;
-        tmp->outfile_flag = 0;
-        while (tmp->init_cmd[i])
-        {
-            if (tmp->init_cmd[i] == '\"' || tmp->init_cmd[i] == '\'')
-                flag[tmp->init_cmd[i] % 2] = 1 - flag[tmp->init_cmd[i] % 2];
-            if (!ft_strncmp(tmp->init_cmd + i, ">>", 2) && flag[0] == 0 && flag[1] == 0)
-            {
-                str = remove_quote_env_do_heredoc(&tmp, envp, flag, i);
-                tmp->outfile = open(str, O_RDWR | O_CREAT | O_TRUNC, 0644);
-                if (tmp->outfile < 0)
-                    return (1);
-                tmp->outfile_flag = 1;
-            }
-            i++;
-        }
-        tmp = tmp ->next;
-    }
-    return (0);
-}
-
-void	delete_node(t_cmd **cur_lst, t_cmd **origin)
-{
-	t_cmd	*prev_node;
-	t_cmd	*current_node;
-
-	prev_node = NULL;
-	current_node = *origin;
-	if (*cur_lst == NULL || origin == NULL || *origin == NULL)
-		return ;
-	while (current_node != NULL)
+	if (err == 2)
+		flag[2] = 1;
+	else if (err == 1)
 	{
-		if (current_node == (*cur_lst))
-			break ;
-		prev_node = current_node;
-		current_node = current_node->next;
+		g_exit_code = 1;
+		return (1);
 	}
-	if (current_node == NULL)
-		return ;
-	if (prev_node == NULL)
-		*origin = current_node->next;
-	else
-		prev_node->next = current_node->next;
-    free(current_node->init_cmd);
-	free(current_node);
+	else if (err == 3)
+	{
+		g_exit_code = 127;
+		write(2, "syntax error\n", 13);
+		return (1);
+	}
+	return (0);
 }
 
-
-int check_redirect_err(t_cmd **tmp, t_cmd **start, int err)
+int	do_redirect(t_cmd **tmp, int *i, char **envp, int flag)
 {
-    if (err == 2)
-    {
-        delete_node(tmp, start);
-        perror("Error");
-        (*tmp) = (*start);
-    }
-    else if (err == 1)
-        return (1);
-    else 
-        (*tmp) = (*tmp)->next;
-    return (0);
+	int		err;
+	char	*name;
+	int		here;
+
+	name = "./heredoc_tmp ";
+	err = 0;
+	here = 0;
+	if ((*tmp)->init_cmd[*i] == '<' && (*tmp)->init_cmd[*i + 1] == '<')
+	{
+		err = do_redirect_heredoc(tmp, *i, name, envp);
+		here = 1;
+	}
+	if (!flag)
+	{	
+		if ((*tmp)->init_cmd[*i] == '<' && (*tmp)->init_cmd[*i + 1] != '<')
+			err = do_redirect_in(tmp, *i, envp);
+		else if ((*tmp)->init_cmd[*i] == '>' && (*tmp)->init_cmd[*i + 1] != '>')
+			err = do_redirect_out(tmp, *i, envp);
+		else if ((*tmp)->init_cmd[*i] == '>' && (*tmp)->init_cmd[*i + 1] == '>')
+			err = do_redirect_pout(tmp, *i, envp);
+	}
+	if (!flag || here)
+		(*i)--;
+	return (err);
 }
 
-int check_redirect(t_cmd **start, char **envp)
+void	err_redirect(t_cmd **tmp, int flag[])
 {
-    t_cmd *tmp;
-    int err;
-    int flag[2];
+	if (flag[2])
+	{
+		perror("Error");
+		g_exit_code = 1;
+		(*tmp)->infile = -1;
+		(*tmp)->outfile = -1;
+		flag[2] = 0;
+	}
+	(*tmp) = (*tmp)->next;
+}
 
-    tmp = (*start);
-    flag[0] = 0;
-    flag[1] = 0;
-    check_heredoc(start, flag, envp);
-    while (tmp)
-    {
-        err = check_redirect_in(&tmp, flag, envp);
-        if (check_redirect_err(&tmp, start, err))
-            return (1);
-    }
-    check_predirect(start, flag, envp);
-    tmp = (*start);
-    while (tmp)
-    {
-        err = check_redirect_out(&tmp, flag, envp);
-        if (check_redirect_err(&tmp, start, err))
-            return (1);
-    }
-    return (0);
+int	check_redirect(t_cmd **start, char **envp)
+{
+	t_cmd	*tmp;
+	int		i;
+	int		f[3];
+
+	f[0] = 0;
+	f[1] = 0;
+	f[2] = 0;
+	tmp = *start;
+	if (check_redirect_err(init_error(tmp), f))
+		return (1);
+	tmp = *start;
+	while (tmp)
+	{
+		i = -1;
+		while (tmp->init_cmd[++i])
+		{
+			check_flag(tmp->init_cmd, f, i);
+			if ((tmp->init_cmd[i] == '<' || tmp->init_cmd[i] == '>') \
+			&& f[0] == 0 && f[1] == 0)
+				if (check_redirect_err(do_redirect(&tmp, &i, envp, f[2]), f))
+					return (1);
+		}
+		err_redirect(&tmp, f);
+	}
+	return (0);
 }

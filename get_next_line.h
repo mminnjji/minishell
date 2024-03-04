@@ -6,7 +6,7 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:28:32 by man               #+#    #+#             */
-/*   Updated: 2023/11/20 14:30:59 by man              ###   ########.fr       */
+/*   Updated: 2023/12/13 10:35:06 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ int		check_n(char *mod);
 void	split_line(char *mod, int n, char *res, char *new_mod);
 char	*get_res(char **mod, int n);
 char	*get_next_line(int fd);
-int		ft_strlen(char *str);
-void	ft_free(char **str);
+int		ft_strlen2(char *str);
+int		ft_free2(void **str);
 int		malloc_fail(char *str, char *one, char **two, int flag);
-char	*ft_strjoin(char *mod, char *buf);
+char	*ft_strjoin2(char *mod, char *buf);
 
 #endif

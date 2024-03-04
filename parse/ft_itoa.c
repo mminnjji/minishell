@@ -6,11 +6,11 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/19 15:04:11 by man               #+#    #+#             */
-/*   Updated: 2023/11/24 13:21:45 by man              ###   ########.fr       */
+/*   Updated: 2023/12/11 18:59:51 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../minishell.h"
 
 static int	int_len(int n)
 {

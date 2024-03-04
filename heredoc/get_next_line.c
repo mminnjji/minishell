@@ -6,11 +6,11 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 12:07:46 by man               #+#    #+#             */
-/*   Updated: 2023/11/22 11:44:25 by man              ###   ########.fr       */
+/*   Updated: 2023/12/11 18:59:51 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/get_next_line.h"
+#include "../get_next_line.h"
 
 int	check_n(char *mod)
 {
@@ -46,7 +46,7 @@ void	split_line(char *mod, int n, char *res, char *new_mod)
 		new_mod[j] = mod[i + j];
 		j++;
 	}
-	ft_free(&mod);
+	ft_free2((void **)&mod);
 	new_mod[j] = 0;
 }
 
@@ -55,9 +55,9 @@ char	*get_res(char **mod, int n)
 	char	*res;
 	char	*new_mod;
 
-	if (!ft_strlen(*mod))
+	if (!ft_strlen2(*mod))
 	{
-		ft_free(mod);
+		ft_free2((void **)mod);
 		return (NULL);
 	}
 	if (n == -1)
@@ -69,7 +69,7 @@ char	*get_res(char **mod, int n)
 	res = (char *)malloc(n + 2);
 	if (malloc_fail(res, NULL, mod, 3))
 		return (NULL);
-	new_mod = (char *)malloc(ft_strlen(*mod) - n);
+	new_mod = (char *)malloc(ft_strlen2(*mod) - n);
 	if (malloc_fail(new_mod, res, mod, 1))
 		return (NULL);
 	split_line(*mod, n, res, new_mod);
@@ -91,13 +91,13 @@ char	*get_next_line(int fd)
 		read_size = read(fd, buf, BUFFER_SIZE);
 		if (read_size == 0 || read_size == -1)
 		{
-			ft_free(&buf);
+			ft_free2((void **)&buf);
 			if (malloc_fail(NULL, NULL, &mod, ((read_size != -1) + 3)))
 				return (NULL);
 			break ;
 		}
 		buf[read_size] = 0;
-		mod = ft_strjoin(mod, buf);
+		mod = ft_strjoin2(mod, buf);
 		if (!mod)
 			return (NULL);
 		if (check_n(mod) >= 0)

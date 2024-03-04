@@ -6,13 +6,14 @@
 /*   By: man <man@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 12:07:50 by man               #+#    #+#             */
-/*   Updated: 2023/11/22 11:44:17 by man              ###   ########.fr       */
+/*   Updated: 2023/12/13 10:35:48 by man              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/get_next_line.h"
+#include "../get_next_line.h"
+#include "../minishell.h"
 
-int	ft_strlen(char *str)
+int	ft_strlen2(char *str)
 {
 	int	i;
 
@@ -24,36 +25,40 @@ int	ft_strlen(char *str)
 	return (i);
 }
 
-void	ft_free(char **str)
+int	ft_free2(void **str)
 {
 	if (!(*str))
-		return ;
+		return (1);
 	free(*str);
 	(*str) = NULL;
+	return (1);
 }
 
 int	malloc_fail(char *str, char *one, char **two, int flag)
 {
 	if (!str && flag == 1)
 	{
-		ft_free(&one);
-		ft_free(two);
+		ft_free2((void **)&one);
+		ft_free2((void **)two);
+		g_exit_code = 1;
 		return (1);
 	}
 	if (!str && flag == 2)
 	{
-		ft_free(&one);
+		ft_free2((void **)&one);
+		g_exit_code = 1;
 		return (1);
 	}
 	if (!str && flag == 3)
 	{
-		ft_free(two);
+		ft_free2((void **)two);
+		g_exit_code = 1;
 		return (1);
 	}
 	return (0);
 }
 
-char	*ft_strjoin(char *mod, char *buf)
+char	*ft_strjoin2(char *mod, char *buf)
 {
 	char	*new_mod;
 	int		i;
@@ -61,7 +66,7 @@ char	*ft_strjoin(char *mod, char *buf)
 
 	i = 0;
 	j = 0;
-	new_mod = (char *)malloc(ft_strlen(mod) + ft_strlen(buf) + 1);
+	new_mod = (char *)malloc(ft_strlen2(mod) + ft_strlen2(buf) + 1);
 	if (malloc_fail(new_mod, buf, &mod, 1))
 		return (NULL);
 	while (mod && mod[i])
@@ -75,7 +80,7 @@ char	*ft_strjoin(char *mod, char *buf)
 		j++;
 	}
 	new_mod[i + j] = 0;
-	ft_free(&mod);
-	ft_free(&buf);
+	ft_free2((void **)&mod);
+	ft_free2((void **)&buf);
 	return (new_mod);
 }
